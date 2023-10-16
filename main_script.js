@@ -24,7 +24,7 @@ app.get('/create_container', (req, res) => {
             }
             console.log(`stdout: ${stdout}`);
             console.error(`stderr: ${stderr}`);
-            res.send(`Conteneur ${containerName} créé avec succès. ID : ${token}`);
+            res.send(`Conteneur ${containerName} créé avec succès. ID : ${token}. Pour accéder à votre conteneur, utilisez cette URL : http://192.168.1.72:3000/create_container#${token}`);
         });
     }
 });
