@@ -1,11 +1,12 @@
 const { exec } = require('child_process');
+const { execSync } = require('child_process'); // Ajout de l'importation pour execSync
 const express = require('express');
 const crypto = require('crypto');
 
 const app = express();
 
 app.get('/create_container', (req, res) => {
-    const token = crypto.randomBytes(8).toString('hex'); // Génère un token aléatoire
+    const token = crypto.randomBytes(8).toString('hex');
     const containerName = req.query.id ? req.query.id : `container_${token}`;
     const containerExists = checkContainerExists(containerName);
 
