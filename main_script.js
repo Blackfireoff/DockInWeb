@@ -1,19 +1,21 @@
 const { exec } = require('child_process');
-const { execSync } = require('child_process'); // Ajout de l'importation pour execSync
 const express = require('express');
 const crypto = require('crypto');
 
 const app = express();
 
+let containers = {};
+
 app.get('/create_container', (req, res) => {
     const token = crypto.randomBytes(8).toString('hex');
-    const containerName = req.query.id ? req.query.id : `container_${token}`;
-    const containerExists = checkContainerExists(containerName);
-
-    if (containerExists) {
-        restartContainer(containerName);
-        res.send(`Redémarrage du conteneur ${containerName}`);
+    const id = req.query.id;
+  
+    if (id && containers[id]) {
+        res.send('Déjà présent');
     } else {
+        const containerName = id ? id : `container_${token}`;
+        containers[containerName] = true;
+
         exec(`docker run -itd --name ${containerName} debian`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Erreur lors de l'exécution de la commande : ${error}`);
@@ -26,15 +28,6 @@ app.get('/create_container', (req, res) => {
         });
     }
 });
-
-function checkContainerExists(containerName) {
-    const result = execSync(`docker ps -aqf "name=${containerName}"`);
-    return result.length > 0;
-}
-
-function restartContainer(containerName) {
-    exec(`docker restart ${containerName}`);
-}
 
 app.listen(3000, () => {
     console.log('Le serveur est en écoute sur le port 3000');
