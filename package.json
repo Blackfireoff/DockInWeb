@@ -1,0 +1,14 @@
+{
+  "name": "dockinweb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main_scirpt.js",
+  "scripts": {
+    "start": "node main_script.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
