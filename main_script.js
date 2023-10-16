@@ -1,31 +1,26 @@
-const { exec } = require('child_process');
 const express = require('express');
-const crypto = require('crypto');
-
 const app = express();
-
-let containers = {};
+const { Docker } = require('dockerode');
+const docker = new Docker();
+const url = require('url');
 
 app.get('/create_container', (req, res) => {
-    const id = req.query.id;
-    const token = id ? id : crypto.randomBytes(8).toString('hex');
-  
-    if (containers[token]) {
-        res.send('Déjà présent');
-    } else {
-        const containerName = `container_${token}`;
-        containers[token] = true;
-
-        exec(`docker run -itd --name ${containerName} debian`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Erreur lors de l'exécution de la commande : ${error}`);
-                res.send('Une erreur s\'est produite lors de la création du conteneur');
-                return;
+    const id = url.parse(req.url).hash ? url.parse(req.url).hash.substring(1) : undefined;
+    if (id) {
+        docker.listContainers({ all: true }, function (err, containers) {
+            if (err) {
+                res.send('Une erreur s\'est produite lors de la recherche du conteneur.');
+            } else {
+                const exists = containers.some(container => container.Names.includes(`/${id}`));
+                if (exists) {
+                    res.send(`Le conteneur avec l'ID ${id} existe déjà.`);
+                } else {
+                    res.send(`Le conteneur avec l'ID ${id} n'existe pas.`);
+                }
             }
-            console.log(`stdout: ${stdout}`);
-            console.error(`stderr: ${stderr}`);
-            res.send(`Conteneur ${containerName} créé avec succès. ID : ${token}. Pour accéder à votre conteneur, utilisez cette URL : http://192.168.1.72:3000/create_container#${token}`);
         });
+    } else {
+        res.send('Veuillez spécifier un ID de conteneur dans l\'URL.');
     }
 });
 
