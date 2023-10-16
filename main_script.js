@@ -7,14 +7,14 @@ const app = express();
 let containers = {};
 
 app.get('/create_container', (req, res) => {
-    const token = crypto.randomBytes(8).toString('hex');
     const id = req.query.id;
+    const token = id ? id : crypto.randomBytes(8).toString('hex');
   
-    if (id && containers[id]) {
+    if (containers[token]) {
         res.send('Déjà présent');
     } else {
-        const containerName = id ? id : `container_${token}`;
-        containers[containerName] = true;
+        const containerName = `container_${token}`;
+        containers[token] = true;
 
         exec(`docker run -itd --name ${containerName} debian`, (error, stdout, stderr) => {
             if (error) {
@@ -24,7 +24,7 @@ app.get('/create_container', (req, res) => {
             }
             console.log(`stdout: ${stdout}`);
             console.error(`stderr: ${stderr}`);
-            res.send(`Conteneur ${containerName} créé avec succès`);
+            res.send(`Conteneur ${containerName} créé avec succès. ID : ${token}`);
         });
     }
 });
